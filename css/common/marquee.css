@@ -1,0 +1,37 @@
+@charset "utf-8";
+
+#page {
+    padding: 20px;
+}
+
+.break {
+    clear: both;
+    height: 0.1px;
+}
+
+.button {
+    border: 1px solid #999;
+    height: 30px;
+    width: 200px;
+    line-height: 30px;
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+    float: left;
+    margin: 5px;
+}
+
+.button-inner {
+    position: absolute;
+    left: 3px;
+    top: 0;
+    width: 1000px;
+}
+
+.button-inner span {
+    display: inline-block;
+}
+
+#status strong {
+    font-weight: bold;
+}
