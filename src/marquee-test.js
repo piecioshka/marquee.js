@@ -1,4 +1,3 @@
-// run marquee
 $(function () {
     function update_status(status) {
         $("#status").html('Status: <strong>' + status + '<\/strong>');
