@@ -1,77 +1,103 @@
 var marquee;
-marquee = (function () {
+marquee = (function ($) {
     "use strict";
 
-    var default_left = null;
+    var TEXT_CONTAINER = ".button-inner";
+    var TEXT_WRAPPER = TEXT_CONTAINER + " span";
+    var ANIMATION_TIME = 2000;
 
     function get_anty_mode(mode) {
-        if (mode === "+") {
-            return "-";
-        } else {
-            return "+";
-        }
+        return (mode === "+") ? "-" : "+";
     }
 
+    /**
+     * Flying letter in container from LEFT to RIGHT
+     *
+     * Example HTML hierarchy:
+     * <pre>
+     *
+     * <div class="button">
+     *     <div class="button-inner">
+     *         <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit</span>
+     *     </div>
+     * </div>
+     *
+     * </pre>
+     * @param {Node} button HTMLElement of button
+     * @param {String} mode Mode for animation direction. Ex. '-' / '+'
+     */
     function fly(button, mode) {
         mode = mode || "-";
-        var antymode = get_anty_mode(mode);
+        var antymode = get_anty_mode(mode),
+            default_left,
+            $button = jQuery(button),
+            $button_inner = $(TEXT_CONTAINER, $button),
+            $button_inner_span = $(TEXT_WRAPPER, $button);
 
-        button = jQuery(button);
-        var button_inner = $(".button-inner", button);
-        var button_inner_span = $(".button-inner span", button);
-
-        if (default_left === null) {
-            default_left = parseInt(button_inner.css("left"), 10);
+        if ($button.attr("default_left") === undefined) {
+            default_left = parseInt($button_inner.css("left"), 10);
+            $button.attr("default_left", default_left);
+        } else {
+            default_left = $button.attr("default_left");
         }
 
-        button.attr("default_left", default_left);
-
-        button_inner.animate({
+        $button_inner.animate({
             left: mode + "=" +(function (b, s) {
                 return s.width() - b.width() + (default_left * 2);
-            }(button, button_inner_span)) + "px"
-        }, 2000, function () {
+            }($button, $button_inner_span)) + "px"
+        }, ANIMATION_TIME, function () {
             setTimeout(function () {
-                fly(button, antymode);
-            }, 1000);
+                fly($button, antymode);
+            }, ANIMATION_TIME / 2);
         });
     }
 
-    function stop(buttons) {
-        for (var i = 0; i < buttons.length; ++i) {
-            var button = jQuery(buttons[i]),
-                button_inner = $(".button-inner", button);
+    /**
+     * Stop flying text in button
+     * @param {Node} button
+     */
+    function stop(button) {
+        var $button = jQuery(button),
+            $button_inner = $(TEXT_CONTAINER, $button);
 
-            button_inner.stop(true, false).css({
-                left: button.attr("default_left") + "px"
-            });
-        }
+        $button_inner.stop(true, false).css({
+            left: $button.attr("default_left") + "px"
+        });
     }
 
     // public API
     return {
-        init: function () {
-            var buttons = $(".button");
-
-            $("#stop").click(function (evt) {
-                stop(buttons);
-                marquee.update_status("stop");
-                evt.preventDefault();
-            });
-
-            $("#run").click(function (evt) {
-                fly(buttons);
-                marquee.update_status("run");
-                evt.preventDefault();
-            });
-
-            $("#run").trigger("click");
-        },
-        update_status: function (status) {
-            $("#status").html('Status: <strong>' + status + '<\/strong>');
-        }
+        fly: fly,
+        stop: stop
     };
-}());
+}(jQuery));
 
 // run marquee
-window.addEventListener("load", marquee.init);
+$(function () {
+    function update_status(status) {
+        $("#status").html('Status: <strong>' + status + '<\/strong>');
+    }
+
+    var buttons = $(".button");
+
+    $("#stop").click(function (evt) {
+        evt.preventDefault();
+
+        $.each(buttons, function (i, button) {
+            marquee.stop(button);
+        });
+        update_status("stop");
+    });
+
+    $("#run").click(function (evt) {
+        evt.preventDefault();
+
+        $.each(buttons, function (i, button) {
+            marquee.stop(button);
+            marquee.fly(button);
+        });
+        update_status("run");
+    });
+
+    $("#run").trigger("click");
+});
