@@ -46,7 +46,7 @@ marquee = (function ($) {
                 return s.width() - b.width() + (default_left * 2);
             }($button, $button_inner_span)) + "px"
         }, ANIMATION_TIME, function () {
-            setTimeout(function () {
+            fly.interval = setTimeout(function () {
                 fly($button, antymode);
             }, ANIMATION_TIME / 2);
         });
@@ -57,6 +57,7 @@ marquee = (function ($) {
      * @param {Node} button
      */
     function stop(button) {
+        clearTimeout(fly.interval);
         var $button = jQuery(button),
             $button_inner = $(TEXT_CONTAINER, $button);
 
