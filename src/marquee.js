@@ -30,6 +30,7 @@ marquee = (function ($) {
         mode = mode || "-";
         var antymode = get_anty_mode(mode),
             default_left,
+            animate_distance,
             $button = jQuery(button),
             $button_inner = $(TEXT_CONTAINER, $button),
             $button_inner_span = $(TEXT_WRAPPER, $button);
@@ -41,10 +42,17 @@ marquee = (function ($) {
             default_left = $button.attr("default_left");
         }
 
+        animate_distance = (function (b, s) {
+            return s.width() - b.width() + (default_left * 2);
+        }($button, $button_inner_span));
+
+        // Condition to check if could run flyging letters
+        if (animate_distance < 0) {
+            return false;
+        }
+
         $button_inner.animate({
-            left: mode + "=" +(function (b, s) {
-                return s.width() - b.width() + (default_left * 2);
-            }($button, $button_inner_span)) + "px"
+            left: mode + "=" + animate_distance + "px"
         }, ANIMATION_TIME, function () {
             fly.interval = setTimeout(function () {
                 fly($button, antymode);
